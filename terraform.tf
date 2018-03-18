@@ -6,7 +6,7 @@ provider "aws" {
   region = "us-east-1"
 }
 
-variable "lambda_source" {
+variable "lambda_function_dir" {
   type = "string"
   default = "myColorSkill"
 }
@@ -55,6 +55,20 @@ EOF
 
 data "archive_file" "lambda_zip" {
     type        = "zip"
-    source_dir  = "${var.lambda_source}"
-    output_path = "lambda.zip"
+    source_dir  = "${var.lambda_function_dir}"
+    output_path = "${var.lambda_function_dir}.zip"
+}
+
+resource "aws_lambda_function" "myColorSkill" {
+  filename = "${var.lambda_function_dir}.zip"
+  source_code_hash = "${data.archive_file.lambda_zip.output_base64sha256}"
+  function_name = "myColorSkill"
+  role = "${aws_iam_role.lambda_basic_execution.arn}"
+  description = "My Color Skill Lambda Function"
+  handler = "lambda_function.lambda_handler"
+  runtime = "python2.7"
+}
+
+output "lambda_function_arn" {
+  value = "${aws_lambda_function.myColorSkill.arn}"
 }
