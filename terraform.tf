@@ -6,6 +6,11 @@ provider "aws" {
   region = "us-east-1"
 }
 
+variable "lambda_source" {
+  type = "string"
+  default = "myColorSkill"
+}
+
 resource "aws_iam_role" "lambda_basic_execution" {
   name = "lambda_basic_execution"
 
@@ -48,3 +53,8 @@ resource "aws_iam_role_policy" "oneClick_lambda_basic_execution_policy" {
 EOF
 }
 
+data "archive_file" "lambda_zip" {
+    type        = "zip"
+    source_dir  = "${var.lambda_source}"
+    output_path = "lambda.zip"
+}
